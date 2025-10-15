@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Dashboard</title></head>
+<body>
+  <h2>Dashboard - Create Booking</h2>
+  <form id="f">
+    <input name="bookingDate" type="date" required><br>
+    <input name="amount" type="number" placeholder="Jumlah" required><br>
+    <button>Book Now</button>
+  </form>
+  <div id="m"></div>
+  <button id="logout">Logout</button>
+  <h3>Your Bookings</h3>
+  <div id="list"></div>
+<script>
+const f=document.getElementById('f'), m=document.getElementById('m'), list=document.getElementById('list');
+f.onsubmit=async e=>{
+  e.preventDefault();
+  const data=Object.fromEntries(new FormData(f));
+  const res=await fetch('/api/book',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  const j=await res.json();
+  m.textContent = j.success ? j.message : j.error;
+  if(j.success) localStorage.setItem('bookingId', j.bookingId);
+  loadBookings();
+};
+
+document.getElementById('logout').onclick=async ()=>{
+  await fetch('/api/logout',{method:'POST'});
+  location='login.html';
+};
+
+async function loadBookings(){
+  const res=await fetch('/api/bookings');
+  const j=await res.json();
+  if(j.success){
+    list.innerHTML = j.bookings.map(b=>`<div>
+      <b>${b.booking_date}</b> - ${b.amount} - Verified: ${b.is_verified ? 'Yes' : 'No' } 
+      ${b.is_verified? '': `<button onclick="toVerify('${b.id}')">Verify</button>`}
+    </div>`).join('');
+  } else list.textContent = 'Gagal load';
+}
+window.toVerify = (id) => {
+  localStorage.setItem('bookingId', id);
+  location='verify.html';
+};
+loadBookings();
+</script>
+</body>
+</html>
