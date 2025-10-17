@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         APP_NAME = "booking-otp"
-        DOCKER_IMAGE = "xxsannx/booking-otp:latest"   // Ganti "xxsannx" dgn username Docker Hub kamu
+        DOCKER_IMAGE = "xxsamx/booking-otp:latest"   // Username Docker Hub kamu
         DOCKERHUB_CRED = credentials('dockerhub_cred')
         EMAIL_USER = credentials('gmail_user')
         EMAIL_PASS = credentials('gmail_pass')
@@ -24,7 +24,10 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo "📦 Installing dependencies..."
-                sh 'npm install'
+                sh '''
+                    npm install
+                    npm audit fix || true
+                '''
             }
         }
 
@@ -63,14 +66,14 @@ pipeline {
 
         stage('Notify Success') {
             steps {
-                echo "✅ Build & Deployment successful!"
+                echo "✅ Build & Deployment successful! App is running on port 3000 🚀"
             }
         }
     }
 
     post {
         failure {
-            echo '❌ Build failed. Please check logs for errors.'
+            echo '❌ Build failed! Please check logs for detailed errors.'
         }
     }
 }
