@@ -1,8 +1,16 @@
 <!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Register</title></head>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Register</title>
+  <style>
+    body { font-family: Arial; background: #f5f6fa; padding: 40px; text-align: center; }
+    input, button { margin: 5px; padding: 8px; width: 220px; }
+    #m { margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
 <body>
-  <h2>Register</h2>
+  <h2>Daftar Akun</h2>
   <form id="f">
     <input name="name" placeholder="Nama" required><br>
     <input name="email" type="email" placeholder="Email" required><br>
@@ -11,14 +19,18 @@
     <button>Daftar</button>
   </form>
   <div id="m"></div>
-  <p><a href="login.html">Login</a></p>
+  <p><a href="login.html">Sudah punya akun? Login</a></p>
+
 <script>
 const f=document.getElementById('f'), m=document.getElementById('m');
 f.onsubmit=async e=>{
   e.preventDefault();
   const data=Object.fromEntries(new FormData(f));
-  const res=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  const res=await fetch('/api/register',{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)
+  });
   const j=await res.json();
+  m.style.color = j.success ? 'green' : 'red';
   m.textContent = j.success ? j.message : j.error;
   if(j.success) setTimeout(()=>location='login.html',1000);
 };

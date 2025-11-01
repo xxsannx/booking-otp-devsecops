@@ -1,24 +1,39 @@
 <!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Dashboard</title></head>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Dashboard - Booking Tempat</title>
+  <style>
+    body { font-family: Arial; background: #f9fafb; padding: 30px; }
+    input, button { margin: 5px; padding: 8px; }
+    #list div { background: #fff; border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 5px; }
+  </style>
+</head>
 <body>
-  <h2>Dashboard - Create Booking</h2>
+  <h2>Dashboard - Buat Booking Tempat</h2>
   <form id="f">
+    <label>Tanggal Booking:</label><br>
     <input name="bookingDate" type="date" required><br>
+    <label>Jumlah Orang:</label><br>
     <input name="amount" type="number" placeholder="Jumlah" required><br>
-    <button>Book Now</button>
+    <button>Buat Booking</button>
   </form>
   <div id="m"></div>
+
   <button id="logout">Logout</button>
-  <h3>Your Bookings</h3>
+
+  <h3>Daftar Booking Anda</h3>
   <div id="list"></div>
+
 <script>
 const f=document.getElementById('f'), m=document.getElementById('m'), list=document.getElementById('list');
+
 f.onsubmit=async e=>{
   e.preventDefault();
   const data=Object.fromEntries(new FormData(f));
   const res=await fetch('/api/book',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
   const j=await res.json();
+  m.style.color = j.success ? 'green' : 'red';
   m.textContent = j.success ? j.message : j.error;
   if(j.success) localStorage.setItem('bookingId', j.bookingId);
   loadBookings();
@@ -33,11 +48,13 @@ async function loadBookings(){
   const res=await fetch('/api/bookings');
   const j=await res.json();
   if(j.success){
-    list.innerHTML = j.bookings.map(b=>`<div>
-      <b>${b.booking_date}</b> - ${b.amount} - Verified: ${b.is_verified ? 'Yes' : 'No' } 
-      ${b.is_verified? '': `<button onclick="toVerify('${b.id}')">Verify</button>`}
-    </div>`).join('');
-  } else list.textContent = 'Gagal load';
+    list.innerHTML = j.bookings.map(b=>`
+      <div>
+        <b>${b.booking_date}</b> - ${b.amount} orang<br>
+        Status: ${b.is_verified ? '<span style="color:green">Terverifikasi</span>' : '<span style="color:red">Belum Verifikasi</span>'}
+        ${b.is_verified? '' : `<br><button onclick="toVerify('${b.id}')">Verifikasi OTP</button>`}
+      </div>`).join('');
+  } else list.textContent = 'Gagal memuat data booking.';
 }
 window.toVerify = (id) => {
   localStorage.setItem('bookingId', id);

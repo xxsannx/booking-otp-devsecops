@@ -1,15 +1,24 @@
 <!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Login</title></head>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Login</title>
+  <style>
+    body { font-family: Arial; background: #f0f2f5; text-align: center; padding: 40px; }
+    input, button { margin: 5px; padding: 8px; width: 220px; }
+    #m { margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
 <body>
-  <h2>Login</h2>
+  <h2>Masuk ke Akun</h2>
   <form id="f">
     <input name="email" type="email" placeholder="Email" required><br>
     <input name="password" type="password" placeholder="Password" required><br>
     <button>Login</button>
   </form>
   <div id="m"></div>
-  <p><a href="register.html">Register</a></p>
+  <p><a href="register.html">Belum punya akun? Daftar</a></p>
+
 <script>
 const f=document.getElementById('f'), m=document.getElementById('m');
 f.onsubmit=async e=>{
@@ -17,6 +26,7 @@ f.onsubmit=async e=>{
   const data=Object.fromEntries(new FormData(f));
   const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
   const j=await res.json();
+  m.style.color = j.success ? 'green' : 'red';
   m.textContent = j.success ? j.message : j.error;
   if(j.success) setTimeout(()=>location='dashboard.html',1000);
 };

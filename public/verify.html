@@ -1,14 +1,23 @@
 <!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Verify OTP</title></head>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Verifikasi OTP</title>
+  <style>
+    body { font-family: Arial; background: #f5f6fa; text-align: center; padding: 40px; }
+    input, button { margin: 5px; padding: 8px; width: 200px; }
+  </style>
+</head>
 <body>
-  <h2>Verify OTP</h2>
+  <h2>Verifikasi OTP Booking</h2>
   <p>Booking ID: <span id="bid"></span></p>
+  <p>Masukkan kode OTP yang telah dikirim ke email Anda.</p>
   <form id="f">
     <input name="otp" placeholder="Kode OTP" required><br>
-    <button>Verify</button>
+    <button>Verifikasi</button>
   </form>
   <div id="m"></div>
+
 <script>
 const bid=localStorage.getItem('bookingId');
 document.getElementById('bid').textContent = bid || 'N/A';
@@ -18,6 +27,7 @@ f.onsubmit=async e=>{
   const otp=(new FormData(f)).get('otp');
   const res=await fetch('/api/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bookingId: bid, otp})});
   const j=await res.json();
+  m.style.color = j.success ? 'green' : 'red';
   m.textContent = j.success ? j.message : j.error;
   if(j.success) setTimeout(()=>location='dashboard.html',1000);
 };
