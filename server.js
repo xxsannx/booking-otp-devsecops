@@ -44,6 +44,22 @@ CREATE TABLE IF NOT EXISTS bookings (
 )
 `).run();
 
+// ✅ AUTO-MIGRATION CHECK
+// Pastikan kolom penting ada (contoh: user_id, otp_hash, dst)
+const requiredColumns = [
+  'user_id', 'booking_date', 'amount', 'otp_hash',
+  'otp_salt', 'otp_expires', 'is_verified', 'created_at'
+];
+
+for (const col of requiredColumns) {
+  try {
+    db.prepare(`SELECT ${col} FROM bookings LIMIT 1`).get();
+  } catch {
+    console.log(`🛠️  Kolom '${col}' belum ada, menambahkannya...`);
+    db.prepare(`ALTER TABLE bookings ADD COLUMN ${col} TEXT`).run();
+  }
+}
+
 // simple session store (demo). In production use Redis/session store.
 const sessions = {}; // { sessionId: userId }
 function requireLogin(req, res, next) {
@@ -63,7 +79,7 @@ function hashOtp(otp, salt) {
   return crypto.createHmac('sha256', salt).update(String(otp)).digest('hex');
 }
 
-// mailer (Gmail app password recommended for dev)
+// mailer
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_PASS }
@@ -148,19 +164,16 @@ app.post('/api/verify', requireLogin, (req, res) => {
   }
 });
 
-// list bookings user (optional)
 app.get('/api/bookings', requireLogin, (req, res) => {
   const rows = db.prepare('SELECT id,booking_date,amount,is_verified,created_at FROM bookings WHERE user_id = ? ORDER BY created_at DESC')
     .all(req.user.id);
   res.json({ success: true, bookings: rows });
 });
 
-// serve index
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
-// start server
 if (require.main === module) {
   app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
 }
 
-module.exports = { app, generateSalt, hashOtp };
+module.exports = { app };
